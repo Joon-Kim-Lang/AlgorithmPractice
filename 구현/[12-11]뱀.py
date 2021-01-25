@@ -41,9 +41,9 @@ timespent = 0
 
 while(True):
 
-  # for i in range(len(mapList)):
-  #   print(mapList[i])
-  # print(timespent)
+  for i in range(len(mapList)):
+    print(mapList[i])
+  print(timespent)
 
   #다음 움직임이 벽일경우
   if mapList[curSnake[0][0]+ direction[0]][curSnake[0][1]+direction[1]] == 0:
