@@ -1,106 +1,76 @@
-import collections 
-
 N = int(input())
-appleCnt = int(input())
+from collections import deque
 
-appleCorList = []
-for i in range(appleCnt):
-  tempList = list(map(int, input().split()))
-  appleCorList.append(tempList)
-
-rotationCnt = int(input())
-rotationInfo = []
-for i in range(rotationCnt):
-  tempList = list(input().split())
-  tempList[0] = int(tempList[0])
-  rotationInfo.append(tempList)
-
-#인풋 입력 종료
-
-mapList= []
+mapList = []
 for i in range(N+2):
   mapList.append([])
   for j in range(N+2):
-    if i == 0 or j == 0 or i == N+1 or j == N+1:
-      mapList[i].append(0)
+    if i == 0 or i == N+1 or j == 0 or j == N+1:
+      mapList[i].append(7)
     else:
-      mapList[i].append(1)
+      mapList[i].append(0)
 
-for i in range(appleCnt):
-  mapList[appleCorList[i][0]][appleCorList[i][1]] =2
+directions = {'N':(-1,0), 'S':(1,0),'E':(0,1),'W':(0,-1)}
+dirQu = deque()
 
-mapList[1][1] =3
-#맵 생성종료
+#사과 개수
+M = int(input())
 
-curSnake = collections.deque() 
-curSnake.append([1,1])
-dir_map = {"east" : [0,1], "west":[0,-1],"south":[1,0],"north":[-1,0]}
-direction =dir_map["east"]
-dir_str = "east"
-timespent = 0
+for _ in range(M):
+  row, col = map(int, input().split())
+  mapList[row][col] = 2
 
-while(True):
+#방향전환정보
+K = int(input())
 
-  for i in range(len(mapList)):
-    print(mapList[i])
-  print(timespent)
+for _ in range(K):
+  sec, direction = input().split()
+  dirQu.append((int(sec), direction))
 
-  #다음 움직임이 벽일경우
-  if mapList[curSnake[0][0]+ direction[0]][curSnake[0][1]+direction[1]] == 0:
-    timespent+=1
+#시작 전 초기화
+mapList[1][1] = 1
+curDir = 'E'
+snakeQu = deque()
+snakeQu.append((1,1))
+
+result = 0
+
+while True:
+  # #맵 출력
+  # for i in range(N+2):
+  #   for j in range(N+2):
+  #     print(mapList[i][j], end=' ')
+  #   print()
+  # print()
+
+  curHead = snakeQu[0]
+  newRow, newCol = curHead[0] + directions[curDir][0], curHead[1] + directions[curDir][1]
+  if mapList[newRow][newCol] == 7 or mapList[newRow][newCol] == 1:
+    print(result +1)
     break
-  #다음 움직임 부분이 1일 경우
-  elif mapList[curSnake[0][0]+ direction[0]][curSnake[0][1]+direction[1]] == 1:
-    mapList[curSnake[0][0]+ direction[0]][curSnake[0][1]+direction[1]] = 3
-    curSnake.appendleft([curSnake[0][0]+ direction[0],curSnake[0][1]+direction[1]])
-    removedCord = curSnake.pop()
-    mapList[removedCord[0]][removedCord[1]] = 1
-  #사과를 먹을경우
-  elif mapList[curSnake[0][0]+ direction[0]][curSnake[0][1]+direction[1]] == 2:
-    mapList[curSnake[0][0]+ direction[0]][curSnake[0][1]+direction[1]] = 3
-    curSnake.appendleft([curSnake[0][0]+ direction[0],curSnake[0][1]+direction[1]])
-  #다음 움직임이 자신의 몸통일경
-  elif mapList[curSnake[0][0]+ direction[0]][curSnake[0][1]+direction[1]] == 3:
-    timespent+=1
-    break
 
-  timespent +=1
+  elif mapList[newRow][newCol] == 0:
+    mapList[newRow][newCol] = 1
+    snakeQu.appendleft((newRow, newCol))
+    deleteInfo = snakeQu.pop()
+    mapList[deleteInfo[0]][deleteInfo[1]] = 0
+  #사과 있을 경우
+  elif mapList[newRow][newCol] == 2:
+    mapList[newRow][newCol] = 1
+    snakeQu.appendleft((newRow, newCol))
 
-  for i in range(len(rotationInfo)):
-    if rotationInfo[i][0] == timespent:
-      if dir_str == "east":
-        if rotationInfo[i][1] == "D":
-          dir_str = "south"
-          direction = dir_map[dir_str]
-        else:
-          dir_str = "north"
-          direction = dir_map[dir_str]
+  result+=1
 
-      elif dir_str == "west":
-        if rotationInfo[i][1] == "D":
-          dir_str = "north"
-          direction = dir_map[dir_str]
-        else:
-          dir_str = "south"
-          direction = dir_map[dir_str]
-
-      elif dir_str == "north":
-        if rotationInfo[i][1] == "D":
-          dir_str = "east"
-          direction = dir_map[dir_str]
-        else:
-          dir_str = "west"
-          direction = dir_map[dir_str]
-
-      elif dir_str == "south":
-        if rotationInfo[i][1] == "D":
-          dir_str = "west"
-          direction = dir_map[dir_str]
-        else:
-          dir_str = "east"
-          direction = dir_map[dir_str]
-
-
-
-
-print(timespent)
+  if len(dirQu) > 0:
+    if dirQu[0][0] == result:
+      curDirInfo = dirQu.popleft()
+      if curDirInfo[1] == 'D':
+        if curDir == 'E': curDir = 'S'
+        elif curDir == 'S': curDir = 'W'
+        elif curDir == 'W' : curDir = 'N'
+        else : curDir = 'E'
+      else:
+        if curDir == 'E': curDir = 'N'
+        elif curDir == 'S': curDir = 'E'
+        elif curDir == 'W' : curDir = 'S'
+        else : curDir = 'W'
