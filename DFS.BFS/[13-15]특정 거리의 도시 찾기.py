@@ -1,51 +1,37 @@
 import heapq
 
-nodeNum,edgeNum,targetDist,startNode = map(int, input().split())
+N, M, dist, start = map(int,input().split())
+connectInfo  = [[] for _ in range(N+1)]
 
-#노드 간 연결정보입력
-nodeList = {}
+for _ in range(M):
+  fr, to = map(int, input().split())
+  connectInfo[fr].append(to)
 
-for i in range(nodeNum):
-  nodeList[i+1] = {}
+INF = int(1e9)
 
-for i in range(edgeNum):
-  start, end = map(int, input().split())
-  nodeList[start][end] = 1
+distance = [INF] *(N+1)
 
-#다익스트라 구현
-def dijkstra(startNode, nodeList):
-  opt_dist_list = {node : float('inf') for node in nodeList}
-  opt_dist_list[startNode] = 0
+qu = []
 
-  heap = []
+distance[start] = 0
+heapq.heappush(qu, (0, start))
 
-  heapq.heappush(heap, [opt_dist_list[startNode], startNode])
+while qu:
+  curDist, curNum = heapq.heappop(qu)
+  if distance[curNum] < curDist:
+    continue
+  
+  for next in connectInfo[curNum]:
+    cost = curDist + 1
+    if cost < distance[next]:
+      distance[next] = cost
+      heapq.heappush(qu, (cost, next))
 
-  while heap:
-    distance, curNode = heapq.heappop(heap)
-
-    if opt_dist_list[curNode] < distance:
-      continue
-
-    for arrival, distance2 in nodeList[curNode].items():
-      opt_distance = distance + distance2
-
-      if(opt_distance < opt_dist_list[arrival]):
-        opt_dist_list[arrival] = opt_distance
-        heapq.heappush(heap, [opt_dist_list[arrival], arrival])
-
-  return opt_dist_list
-
-result = dijkstra(startNode,nodeList)
-
-checkIsnull = True
-for i in nodeList:
-  if result[i] == targetDist:
+isFound =False
+for i, v in enumerate(distance):
+  if v == dist:
     print(i)
-    checkIsnull = False
-
-if checkIsnull:
-  print(-1) 
-
-
+    isFound = True
+if isFound ==False:
+  print(-1)
 
